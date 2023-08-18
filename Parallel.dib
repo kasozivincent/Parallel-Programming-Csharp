@@ -1,0 +1,132 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!csharp
+
+using System;
+using System.Threading.Tasks;
+
+class Listing01{
+    public static void Method(){
+        //Task.Factory.StartNew(() => Console.WriteLine("Hello World!"));
+        var task = new Task(() => Console.WriteLine("Parallel Programming!"));
+        task.Start();
+        Console.WriteLine("Main method complete. Press enter to finish");
+        Console.ReadLine();
+    }
+}
+
+
+Listing01.Method()
+
+#!markdown
+
+## Using the Task class to create new tasks
+
+#!csharp
+
+class Listing02 {
+    public static void Method(){
+         var task1 = new Task(new Action(PrintMessage));
+         var task2 = new Task(delegate { PrintMessage();});
+         var task3 = new Task(() => PrintMessage());
+
+         task1.Start(); task2.Start(); task3.Start();
+         Console.WriteLine("Main method complete. Press enter to finish");
+         Console.ReadLine();
+    } 
+
+    static void PrintMessage(){
+        Console.WriteLine("Hello parallel programming.");
+    }
+}
+
+Listing02.Method();
+
+#!markdown
+
+## Passing state to tasks
+
+#!csharp
+
+class Listing03 {
+    public static void Method(){
+        var task1 = new Task(new Action<object>(PrintMessage), "First Task");
+        var task2 = new Task(delegate (object msg) { PrintMessage(msg); }, "Second Task");
+        var task3 = new Task((msg) => PrintMessage(msg), "Third Task");
+
+        task1.Start(); task2.Start(); task3.Start();
+
+        Console.WriteLine("Main method complete. Press enter to finish");
+        Console.ReadLine();
+    }
+
+    static void PrintMessage(object message){
+        Console.WriteLine($"Message: {message}");
+    }
+}
+
+Listing03.Method()
+
+#!markdown
+
+## Assigning Tasks payloads in a list
+
+#!csharp
+
+using System.Collections.Generic;
+
+class Listing04 {
+    public static void Method() {
+        void PrintMessage(object message) => Console.WriteLine($"Message: {message}");
+        var names = new List<string>() {"kasozi", "vincent", "newton", "vanessa"};
+
+        foreach(string name in names){
+            var task = new Task(message => PrintMessage(message), name);
+            task.Start();
+        }
+
+        Console.WriteLine("Main method complete. Press enter to finish");
+        Console.ReadLine();
+    }
+}
+
+Listing04.Method()
+
+#!markdown
+
+## Getting results from a task
+
+#!csharp
+
+class Listing05 {
+    public static void Method() {
+        //creating a task that returns a result and takes in no state.
+        var task1 = new Task<int> ( () => {
+            var sum = 0;
+            for(int i = 1; i < 100; i++){
+                sum += i;
+            }
+            return sum;
+        });
+
+        task1.Start();
+        Console.WriteLine($"The sum from task 1 is {task1.Result}");
+
+        //creating a task that takes in state and returns a result.
+        var task2 = new Task<int>(upperBound => {
+            var upper = (int)upperBound;
+            var sum = 0;
+            for(int i = 1; i < 100; i++){
+                sum += i;
+            }
+            return sum;
+        }, 100);
+
+        task2.Start();
+        Console.WriteLine($"The sum from task 2 is {task2.Result}");
+    }
+}
+
+Listing05.Method()
